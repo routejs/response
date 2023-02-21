@@ -59,5 +59,5 @@ export declare class Response {
   status(code: number, message?: string): this;
   type(type: string): this;
   vary(name: string): this;
-  write(chunk: any, encoding?: string): this;
+  write(chunk: string | Buffer | Uint8Array, encoding?: string): this;
 }
