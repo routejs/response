@@ -1,11 +1,12 @@
 const request = require("supertest");
 const { Response } = require("../index.cjs");
+const Readable = require("stream").Readable;
 
 describe("Response test", () => {
   test("Set header text/html", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
-      response.setHeader("Content-Type", "text/html").end();
+      const response = Response({ res });
+      response.set("Content-Type", "text/html").end();
     })
       .get("/")
       .expect(200)
@@ -16,9 +17,9 @@ describe("Response test", () => {
 
   test("Set multiple headers", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
-      response.setHeader("Content-Type", "text/html");
-      response.setHeader("Set-Cookie", ["a=10", "b=20"]);
+      const response = Response({ res });
+      response.set("Content-Type", "text/html");
+      response.set("Set-Cookie", ["a=10", "b=20"]);
       response.end();
     })
       .get("/")
@@ -31,9 +32,9 @@ describe("Response test", () => {
 
   test("Set multiple headers from object", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response
-        .setHeader({
+        .set({
           "Content-Type": "text/html",
           "Set-Cookie": ["a=10", "b=20"],
         })
@@ -49,8 +50,8 @@ describe("Response test", () => {
 
   test("Append header", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
-      response.setHeader("Content-Type", "text/html");
+      const response = Response({ res });
+      response.set("Content-Type", "text/html");
       response.append("Set-Cookie", "a=10; HttpOnly");
       response.append("Set-Cookie", "b=20; HttpOnly");
       response.end();
@@ -67,8 +68,8 @@ describe("Response test", () => {
 
   test("Append multiple headers", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
-      response.setHeader("Content-Type", "text/html");
+      const response = Response({ res });
+      response.set("Content-Type", "text/html");
       response.append({ "Set-Cookie": ["a=10; HttpOnly", "b=20; HttpOnly"] });
       response.append("Set-Cookie", ["c=10; HttpOnly", "d=20"]);
       response.end();
@@ -87,9 +88,9 @@ describe("Response test", () => {
 
   test("Remove header", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
-      response.setHeader("Content-Type", "text/html");
-      response.setHeader("Set-Cookie", ["a=10", "b=20"]);
+      const response = Response({ res });
+      response.set("Content-Type", "text/html");
+      response.set("Set-Cookie", ["a=10", "b=20"]);
       response.removeHeader("Set-Cookie");
       response.end();
     })
@@ -103,9 +104,9 @@ describe("Response test", () => {
 
   test("Remove multiple header", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
-      response.setHeader("Content-Type", "text/html");
-      response.setHeader("Set-Cookie", ["a=10", "b=20"]);
+      const response = Response({ res });
+      response.set("Content-Type", "text/html");
+      response.set("Set-Cookie", ["a=10", "b=20"]);
       response.removeHeader("Content-Type");
       response.removeHeader("Set-Cookie");
       response.end();
@@ -120,9 +121,9 @@ describe("Response test", () => {
 
   test("Get all headers", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
-      response.setHeader("Content-Type", "text/html");
-      response.setHeader("Set-Cookie", ["a=10", "b=20"]);
+      const response = Response({ res });
+      response.set("Content-Type", "text/html");
+      response.set("Set-Cookie", ["a=10", "b=20"]);
       response.end();
       expect(response.getHeaders()).toEqual({
         "content-type": "text/html",
@@ -135,9 +136,9 @@ describe("Response test", () => {
 
   test("Get single header", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
-      response.setHeader("Content-Type", "text/html");
-      response.setHeader("Set-Cookie", ["a=10", "b=20"]);
+      const response = Response({ res });
+      response.set("Content-Type", "text/html");
+      response.set("Set-Cookie", ["a=10", "b=20"]);
       response.end();
       expect(response.getHeader("content-type")).toBe("text/html");
     })
@@ -147,7 +148,7 @@ describe("Response test", () => {
 
   test("Set cookie", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.cookie("a", 10);
       response.cookie("b", 20);
       response.end();
@@ -161,7 +162,7 @@ describe("Response test", () => {
 
   test("Delete cookie", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.cookie("a", 10);
       response.cookie("b", 20);
       response.clearCookie("b");
@@ -180,9 +181,10 @@ describe("Response test", () => {
 
   test("Write Hello, World to body", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.write("Hello");
-      response.write(", World").end();
+      response.write(", World");
+      response.end();
     })
       .get("/")
       .expect(200)
@@ -193,7 +195,7 @@ describe("Response test", () => {
 
   test("End method should response with status code 200 with body Ok", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.end("Ok");
     })
       .get("/")
@@ -205,7 +207,7 @@ describe("Response test", () => {
 
   test("Send method should response with status code 200 with body Ok", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.send("Ok");
     })
       .get("/")
@@ -217,7 +219,7 @@ describe("Response test", () => {
 
   test("Send status method should response with status code 400", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.sendStatus(400);
     })
       .get("/")
@@ -226,7 +228,7 @@ describe("Response test", () => {
 
   test("Set status code 400 and body Ok", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.status(400).send("Ok");
     })
       .get("/")
@@ -238,7 +240,7 @@ describe("Response test", () => {
 
   test("Send json response", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.json({ a: 10 });
     })
       .get("/")
@@ -251,7 +253,7 @@ describe("Response test", () => {
 
   test("Send json response", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.json([{ a: 10 }]);
     })
       .get("/")
@@ -264,7 +266,7 @@ describe("Response test", () => {
 
   test("Send jsonp response", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.jsonp({ a: 10 }, "test");
     })
       .get("/")
@@ -277,7 +279,7 @@ describe("Response test", () => {
 
   test("Send header", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.sendHeader("Content-Type", "text/html");
     })
       .get("/")
@@ -289,7 +291,7 @@ describe("Response test", () => {
 
   test("Set links header", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response
         .links({
           next: "http://example.com",
@@ -308,7 +310,7 @@ describe("Response test", () => {
 
   test("Set vary header", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.vary(["Content-Type", "Accept"]).end();
     })
       .get("/")
@@ -320,13 +322,28 @@ describe("Response test", () => {
 
   test("Redirect response", async () => {
     await request(function (req, res) {
-      const response = new Response({ req: req, res: res });
+      const response = Response({ res });
       response.redirect("http://example.com");
     })
       .get("/")
       .expect(302)
       .then((res) => {
         expect(res.header["location"]).toBe("http://example.com");
+      });
+  });
+
+  test("Pipe response", async () => {
+    await request(function (req, res) {
+      const response = Response({ res });
+      const s = new Readable();
+      s.push("Ok");
+      s.push(null);
+      s.pipe(response);
+    })
+      .get("/")
+      .expect(200)
+      .then((res) => {
+        expect(res.text).toEqual("Ok");
       });
   });
 });

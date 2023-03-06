@@ -1,2 +1,2 @@
 const Response = require("./src/response.cjs");
-module.exports = { Response };
+module.exports = Response;

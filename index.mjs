@@ -1,1 +1,1 @@
-export { default as Response } from "./src/response.mjs";
+export { default } from "./src/response.mjs";

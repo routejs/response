@@ -2,62 +2,43 @@ import fs from "node:fs";
 import path from "node:path";
 import mime from "mime-types";
 
-export default class Response {
-  res = null;
-  headersSent = null;
-  locals = null;
-  #req = null;
-  #config = {};
-
-  constructor(context, options = {}) {
-    this.res = context.res;
-    this.#req = context.req;
-    this.#config = options;
-
-    this.headersSent = this.res.headersSent;
-  }
-
-  append(name, value = null) {
-    this.appendHeader(name, value);
-    return this;
-  }
-
-  appendHeader(name, value) {
-    if (typeof name === "string" || name instanceof String) {
-      this.res.appendHeader(name, value);
-    } else if (!!name && Array.isArray(name) === false) {
-      for (const key of Object.keys(name)) {
+export default {
+  append(field, value = null) {
+    if (typeof field === "string" || field instanceof String) {
+      this.appendHeader(field, value);
+    } else if (!!field && Array.isArray(field) === false) {
+      for (const key of Object.keys(field)) {
         if (typeof key === "string" || key instanceof String) {
-          this.res.appendHeader(key, name[key]);
+          this.appendHeader(key, field[key]);
         } else {
           throw new TypeError(
-            "Error: appendHeader function name parameter only accepts string or object as an argument"
+            "Error: append function field parameter only accepts string or object as an argument"
           );
         }
       }
     } else {
       throw new TypeError(
-        "Error: appendHeader function name parameter only accepts string or object as an argument"
+        "Error: append function field parameter only accepts string or object as an argument"
       );
     }
     return this;
-  }
+  },
 
-  attachment(fileName = null) {
-    if (fileName) {
+  attachment(filename = null) {
+    if (filename) {
       // Set content type
-      this.type(mime.lookup(fileName));
+      this.type(mime.lookup(filename));
       // Set content disposition
       this.setHeader(
         "Content-Disposition",
-        `attachment; filename="${path.basename(fileName)}"`
+        `attachment; filename="${path.basename(filename)}"`
       );
     } else {
       // Set content disposition
       this.setHeader("Content-Disposition", "attachment");
     }
     return this;
-  }
+  },
 
   cookie(name, value, options = {}) {
     const {
@@ -101,7 +82,7 @@ export default class Response {
     }
     this.append("Set-Cookie", cookieAttributes);
     return this;
-  }
+  },
 
   clearCookie(name, options = {}) {
     this.cookie(name, "", {
@@ -109,68 +90,47 @@ export default class Response {
       maxAge: -1,
     });
     return this;
-  }
+  },
 
-  download(filePath, fileName = null) {
+  download(path, filename = null) {
     // Set content disposition
     this.setHeader(
       "Content-Disposition",
-      `attachment; filename="${fileName ? fileName : path.basename(filePath)}"`
+      `attachment; filename="${filename ? filename : path.basename(path)}"`
     );
-    this.sendFile(filePath, fileName);
-  }
+    this.sendFile(path, filename);
+  },
 
-  end(data, encoding = "utf8") {
-    this.res.end(data, encoding);
-  }
+  get(field) {
+    return this.getHeader(field);
+  },
 
-  flushHeaders() {
-    this.res.flushHeaders();
+  has(field) {
+    return this.hasHeader(field);
+  },
+
+  header(field, value = null) {
+    this.setHeader(field, value);
     return this;
-  }
-
-  get(name) {
-    return this.getHeader(name);
-  }
-
-  getHeader(name) {
-    return this.res.getHeader(name);
-  }
-
-  getHeaders() {
-    return this.res.getHeaders();
-  }
-
-  hasHeader(name) {
-    return this.res.hasHeader(name);
-  }
-
-  has(name) {
-    return this.hasHeader(name);
-  }
-
-  header(name, value = null) {
-    this.setHeader(name, value);
-    return this;
-  }
+  },
 
   json(body) {
-    this.setHeader("Content-Type", ["application/json"]).end(
+    this.setHeader("Content-Type", "application/json").end(
       JSON.stringify(body)
     );
-  }
+  },
 
   jsonp(body, callback = "callback") {
-    this.setHeader("Content-Type", ["application/javascript"]).end(
+    this.setHeader("Content-Type", "application/javascript").end(
       `${callback}(${JSON.stringify(body)})`
     );
-  }
+  },
 
   links(links) {
     if (typeof links === "object" && !Array.isArray(links) && links !== null) {
       let value = [];
-      for (const key of Object.keys(links)) {
-        value.push(`<${links[key]}>; rel="${key}"`);
+      for (const rel of Object.keys(links)) {
+        value.push(`<${links[rel]}>; rel="${rel}"`);
       }
       this.setHeader("Link", value);
     } else {
@@ -179,121 +139,106 @@ export default class Response {
       );
     }
     return this;
-  }
+  },
 
   location(path) {
     this.setHeader("Location", path);
     return this;
-  }
+  },
 
   redirect(path, status = 302) {
     this.status(status).setHeader("Location", path).end();
-  }
+  },
 
-  remove(name) {
-    this.removeHeader(name);
-    return this;
-  }
-
-  removeHeader(name) {
-    if (typeof name === "string" || name instanceof String) {
-      this.res.removeHeader(name);
-    } else if (Array.isArray(name)) {
-      name.forEach((key) => {
+  remove(field) {
+    if (typeof field === "string" || field instanceof String) {
+      this.removeHeader(field);
+    } else if (Array.isArray(field)) {
+      field.forEach((key) => {
         if (typeof key === "string" || key instanceof String) {
-          this.res.removeHeader(key);
+          this.removeHeader(key);
         } else {
           throw new TypeError(
-            "Error: removeHeader function name parameter only accepts string or array of string as an argument"
+            "Error: remove function field parameter only accepts string or array of string as an argument"
           );
         }
       });
     } else {
       throw new TypeError(
-        "Error: removeHeader function name parameter only accepts string or array of string as an argument"
+        "Error: remove function field parameter only accepts string or array of string as an argument"
       );
     }
     return this;
-  }
+  },
 
   send(body) {
     this.end(body);
-  }
+  },
 
-  sendFile(filePath) {
-    if (!fs.existsSync(filePath)) {
-      throw Error(`Error: file ${filePath} does not exists`);
+  sendFile(path) {
+    if (!fs.existsSync(path)) {
+      throw Error(`Error: file ${path} does not exists`);
     }
 
     // Set content type
-    this.type(mime.lookup(filePath));
+    this.type(mime.lookup(path));
 
     // Set content length if file exists
-    const fileStat = fs.statSync(filePath);
+    const fileStat = fs.statSync(path);
     this.setHeader("Content-Length", fileStat.size);
 
-    const stream = fs.createReadStream(filePath);
-    stream.pipe(this.res);
-  }
+    const stream = fs.createReadStream(path);
+    stream.pipe(this);
+  },
 
-  sendHeader(name, value = null) {
-    this.setHeader(name, value).end();
-  }
+  sendHeader(field, value = null) {
+    this.setHeader(field, value).end();
+  },
 
   sendStatus(code, message = null) {
-    this.res.statusCode = code;
+    this.statusCode = code;
     if (message) {
-      this.res.statusMessage = message;
+      this.statusMessage = message;
     }
     this.end();
-  }
+  },
 
-  set(name, value = null) {
-    this.setHeader(name, value);
-    return this;
-  }
-
-  setHeader(name, value = null) {
-    if (typeof name === "string" || name instanceof String) {
-      this.res.setHeader(name, value);
-    } else if (!!name && Array.isArray(name) === false) {
-      for (const key of Object.keys(name)) {
+  set(field, value = null) {
+    if (typeof field === "string" || field instanceof String) {
+      this.setHeader(field, value);
+    } else if (!!field && Array.isArray(field) === false) {
+      for (const key of Object.keys(field)) {
         if (typeof key === "string" || key instanceof String) {
-          this.res.setHeader(key, name[key]);
+          this.setHeader(key, field[key]);
         } else {
           throw new TypeError(
-            "Error: setHeader function name parameter only accepts string or object as an argument"
+            "Error: set function field parameter only accepts string or object as an argument"
           );
         }
       }
     } else {
       throw new TypeError(
-        "Error: setHeader function name parameter only accepts string or object as an argument"
+        "Error: set function field parameter only accepts string or object as an argument"
       );
     }
     return this;
-  }
+  },
 
   status(code, message = null) {
-    this.res.statusCode = code;
+    this.statusCode = code;
     if (message) {
-      this.res.statusMessage = message;
+      this.statusMessage = message;
     }
     return this;
-  }
+  },
 
   type(type) {
     this.setHeader("Content-Type", `${type}`);
     return this;
-  }
+  },
 
-  vary(name) {
-    this.setHeader("Vary", name);
+  vary(field) {
+    this.setHeader("Vary", field);
     return this;
-  }
-
-  write(chunk, encoding = "utf8") {
-    this.res.write(chunk, encoding);
-    return this;
-  }
-}
+  },
+};
