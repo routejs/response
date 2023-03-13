@@ -1,5 +1,5 @@
 const request = require("supertest");
-const { Response } = require("../index.cjs");
+const Response = require("../index.cjs");
 const Readable = require("stream").Readable;
 
 describe("Response test", () => {
@@ -272,8 +272,12 @@ describe("Response test", () => {
       .get("/")
       .expect(200)
       .then((res) => {
-        expect(res.header["content-type"]).toBe("application/javascript");
-        expect(res.text).toEqual(`test(${JSON.stringify({ a: 10 })})`);
+        expect(res.header["content-type"]).toBe("text/javascript");
+        expect(res.text).toEqual(
+          `/**/ typeof test === 'function' && test(${JSON.stringify({
+            a: 10,
+          })});`
+        );
       });
   });
 
@@ -311,7 +315,31 @@ describe("Response test", () => {
   test("Set vary header", async () => {
     await request(function (req, res) {
       const response = Response({ res });
+      response.vary("Content-Type").end();
+    })
+      .get("/")
+      .expect(200)
+      .then((res) => {
+        expect(res.header["vary"]).toBe("Content-Type");
+      });
+  });
+
+  test("Set multiple vary header from array", async () => {
+    await request(function (req, res) {
+      const response = Response({ res });
       response.vary(["Content-Type", "Accept"]).end();
+    })
+      .get("/")
+      .expect(200)
+      .then((res) => {
+        expect(res.header["vary"]).toBe("Content-Type, Accept");
+      });
+  });
+
+  test("Set multiple vary header", async () => {
+    await request(function (req, res) {
+      const response = Response({ res });
+      response.vary("Content-Type").vary("Accept").end();
     })
       .get("/")
       .expect(200)
