@@ -1,4 +1,4 @@
-const parseResponse = require("./response/node.cjs");
+const parseNodeResponse = require("./response/node.cjs");
 const supportedServers = ["node"];
 
 module.exports = function response({ res, req }, options = {}) {
@@ -14,11 +14,11 @@ module.exports = function response({ res, req }, options = {}) {
     }
 
     if (options.server.toLowerCase() === "node") {
-      res = parseResponse({ req, res }, options);
+      res = parseNodeResponse({ req, res }, options);
     }
   } else {
     // Create default http response object
-    res = parseResponse({ req, res }, options);
+    res = parseNodeResponse({ req, res }, options);
   }
 
   res.locals = {};

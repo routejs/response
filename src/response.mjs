@@ -1,4 +1,4 @@
-import parseResponse from "./response/node.cjs";
+import parseNodeResponse from "./response/node.cjs";
 const supportedServers = ["node"];
 
 export default function response({ res, req }, options = {}) {
@@ -14,11 +14,11 @@ export default function response({ res, req }, options = {}) {
     }
 
     if (options.server.toLowerCase() === "node") {
-      res = parseResponse({ req, res }, options);
+      res = parseNodeResponse({ req, res }, options);
     }
   } else {
     // Create default http response object
-    res = parseResponse({ req, res }, options);
+    res = parseNodeResponse({ req, res }, options);
   }
 
   res.locals = {};
