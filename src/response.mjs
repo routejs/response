@@ -1,6 +1,9 @@
-import NodeResponse from "./response/node.cjs";
+import parseResponse from "./response/node.cjs";
+const supportedServers = ["node"];
 
 export default function response({ res, req }, options = {}) {
+  // Set default value
+  options.server = options.server || "node";
   // Create http response object
   if (
     options.server &&
@@ -11,11 +14,11 @@ export default function response({ res, req }, options = {}) {
     }
 
     if (options.server.toLowerCase() === "node") {
-      res = Object.assign(res, NodeResponse);
+      res = parseResponse({ req, res }, options);
     }
   } else {
     // Create default http response object
-    res = Object.assign(res, NodeResponse);
+    res = parseResponse({ req, res }, options);
   }
 
   res.locals = {};

@@ -20,7 +20,6 @@ declare interface CookieOptions {
 }
 
 declare interface Response {
-  readonly headersSent: boolean;
   append(field: string, value: number | string | ReadonlyArray<string>): this;
   attachment(filename?: string): this;
   contentType(type: string, charset?: string = "utf-8"): this;

@@ -1,12 +1,12 @@
-const request = require("supertest");
-const Response = require("../index.cjs");
+const supertest = require("supertest");
+const responseWrapper = require("../index.cjs");
 const Readable = require("stream").Readable;
 
 describe("Response test", () => {
   test("Set header text/html", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.set("Content-Type", "text/html").end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.set("Content-Type", "text/html").end();
     })
       .get("/")
       .expect(200)
@@ -16,11 +16,11 @@ describe("Response test", () => {
   });
 
   test("Set multiple headers", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.set("Content-Type", "text/html");
-      response.set("Set-Cookie", ["a=10", "b=20"]);
-      response.end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.set("Content-Type", "text/html");
+      res.set("Set-Cookie", ["a=10", "b=20"]);
+      res.end();
     })
       .get("/")
       .expect(200)
@@ -31,9 +31,9 @@ describe("Response test", () => {
   });
 
   test("Set multiple headers from object", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res
         .set({
           "Content-Type": "text/html",
           "Set-Cookie": ["a=10", "b=20"],
@@ -49,12 +49,12 @@ describe("Response test", () => {
   });
 
   test("Append header", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.set("Content-Type", "text/html");
-      response.append("Set-Cookie", "a=10; HttpOnly");
-      response.append("Set-Cookie", "b=20; HttpOnly");
-      response.end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.set("Content-Type", "text/html");
+      res.append("Set-Cookie", "a=10; HttpOnly");
+      res.append("Set-Cookie", "b=20; HttpOnly");
+      res.end();
     })
       .get("/")
       .expect(200)
@@ -67,12 +67,12 @@ describe("Response test", () => {
   });
 
   test("Append multiple headers", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.set("Content-Type", "text/html");
-      response.append({ "Set-Cookie": ["a=10; HttpOnly", "b=20; HttpOnly"] });
-      response.append("Set-Cookie", ["c=10; HttpOnly", "d=20"]);
-      response.end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.set("Content-Type", "text/html");
+      res.append({ "Set-Cookie": ["a=10; HttpOnly", "b=20; HttpOnly"] });
+      res.append("Set-Cookie", ["c=10; HttpOnly", "d=20"]);
+      res.end();
     })
       .get("/")
       .expect(200)
@@ -87,12 +87,12 @@ describe("Response test", () => {
   });
 
   test("Remove header", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.set("Content-Type", "text/html");
-      response.set("Set-Cookie", ["a=10", "b=20"]);
-      response.removeHeader("Set-Cookie");
-      response.end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.set("Content-Type", "text/html");
+      res.set("Set-Cookie", ["a=10", "b=20"]);
+      res.removeHeader("Set-Cookie");
+      res.end();
     })
       .get("/")
       .expect(200)
@@ -103,13 +103,13 @@ describe("Response test", () => {
   });
 
   test("Remove multiple header", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.set("Content-Type", "text/html");
-      response.set("Set-Cookie", ["a=10", "b=20"]);
-      response.removeHeader("Content-Type");
-      response.removeHeader("Set-Cookie");
-      response.end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.set("Content-Type", "text/html");
+      res.set("Set-Cookie", ["a=10", "b=20"]);
+      res.removeHeader("Content-Type");
+      res.removeHeader("Set-Cookie");
+      res.end();
     })
       .get("/")
       .expect(200)
@@ -120,12 +120,12 @@ describe("Response test", () => {
   });
 
   test("Get all headers", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.set("Content-Type", "text/html");
-      response.set("Set-Cookie", ["a=10", "b=20"]);
-      response.end();
-      expect(response.getHeaders()).toEqual({
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.set("Content-Type", "text/html");
+      res.set("Set-Cookie", ["a=10", "b=20"]);
+      res.end();
+      expect(res.getHeaders()).toEqual({
         "content-type": "text/html",
         "set-cookie": ["a=10", "b=20"],
       });
@@ -135,23 +135,23 @@ describe("Response test", () => {
   });
 
   test("Get single header", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.set("Content-Type", "text/html");
-      response.set("Set-Cookie", ["a=10", "b=20"]);
-      response.end();
-      expect(response.getHeader("content-type")).toBe("text/html");
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.set("Content-Type", "text/html");
+      res.set("Set-Cookie", ["a=10", "b=20"]);
+      res.end();
+      expect(res.getHeader("content-type")).toBe("text/html");
     })
       .get("/")
       .expect(200);
   });
 
   test("Set cookie", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.cookie("a", 10);
-      response.cookie("b", 20);
-      response.end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.cookie("a", 10);
+      res.cookie("b", 20);
+      res.end();
     })
       .get("/")
       .expect(200)
@@ -161,12 +161,12 @@ describe("Response test", () => {
   });
 
   test("Delete cookie", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.cookie("a", 10);
-      response.cookie("b", 20);
-      response.clearCookie("b");
-      response.end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.cookie("a", 10);
+      res.cookie("b", 20);
+      res.clearCookie("b");
+      res.end();
     })
       .get("/")
       .expect(200)
@@ -180,11 +180,11 @@ describe("Response test", () => {
   });
 
   test("Write Hello, World to body", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.write("Hello");
-      response.write(", World");
-      response.end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.write("Hello");
+      res.write(", World");
+      res.end();
     })
       .get("/")
       .expect(200)
@@ -194,9 +194,9 @@ describe("Response test", () => {
   });
 
   test("End method should response with status code 200 with body Ok", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.end("Ok");
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.end("Ok");
     })
       .get("/")
       .expect(200)
@@ -206,9 +206,9 @@ describe("Response test", () => {
   });
 
   test("Send method should response with status code 200 with body Ok", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.send("Ok");
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.send("Ok");
     })
       .get("/")
       .expect(200)
@@ -218,18 +218,18 @@ describe("Response test", () => {
   });
 
   test("Send status method should response with status code 400", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.sendStatus(400);
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.sendStatus(400);
     })
       .get("/")
       .expect(400);
   });
 
   test("Set status code 400 and body Ok", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.status(400).send("Ok");
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.status(400).send("Ok");
     })
       .get("/")
       .expect(400)
@@ -239,9 +239,9 @@ describe("Response test", () => {
   });
 
   test("Send json response", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.json({ a: 10 });
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.json({ a: 10 });
     })
       .get("/")
       .expect(200)
@@ -252,9 +252,9 @@ describe("Response test", () => {
   });
 
   test("Send json response", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.json([{ a: 10 }]);
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.json([{ a: 10 }]);
     })
       .get("/")
       .expect(200)
@@ -265,9 +265,9 @@ describe("Response test", () => {
   });
 
   test("Send jsonp response", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.jsonp({ a: 10 }, "test");
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.jsonp({ a: 10 }, "test");
     })
       .get("/")
       .expect(200)
@@ -282,9 +282,9 @@ describe("Response test", () => {
   });
 
   test("Send header", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.sendHeader("Content-Type", "text/html");
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.sendHeader("Content-Type", "text/html");
     })
       .get("/")
       .expect(200)
@@ -294,9 +294,9 @@ describe("Response test", () => {
   });
 
   test("Set links header", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res
         .links({
           next: "http://example.com",
           prev: "http://example.com",
@@ -313,9 +313,9 @@ describe("Response test", () => {
   });
 
   test("Set vary header", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.vary("Content-Type").end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.vary("Content-Type").end();
     })
       .get("/")
       .expect(200)
@@ -325,9 +325,9 @@ describe("Response test", () => {
   });
 
   test("Set multiple vary header from array", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.vary(["Content-Type", "Accept"]).end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.vary(["Content-Type", "Accept"]).end();
     })
       .get("/")
       .expect(200)
@@ -337,9 +337,9 @@ describe("Response test", () => {
   });
 
   test("Set multiple vary header", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.vary("Content-Type").vary("Accept").end();
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.vary("Content-Type").vary("Accept").end();
     })
       .get("/")
       .expect(200)
@@ -349,9 +349,9 @@ describe("Response test", () => {
   });
 
   test("Redirect response", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
-      response.redirect("http://example.com");
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
+      res.redirect("http://example.com");
     })
       .get("/")
       .expect(302)
@@ -361,12 +361,12 @@ describe("Response test", () => {
   });
 
   test("Pipe response", async () => {
-    await request(function (req, res) {
-      const response = Response({ res });
+    await supertest(function (req, res) {
+      res = responseWrapper({ res });
       const s = new Readable();
       s.push("Ok");
       s.push(null);
-      s.pipe(response);
+      s.pipe(res);
     })
       .get("/")
       .expect(200)
