@@ -10,7 +10,7 @@ export default function ({ req, res }, options = {}) {
       value: function (field, value = null) {
         if (!field) {
           throw new TypeError(
-            "Error: append function field parameter only accepts string or object as an argument"
+            "append function field parameter only accepts string or object as an argument"
           );
         }
 
@@ -34,13 +34,13 @@ export default function ({ req, res }, options = {}) {
               return this.set(key, field[key]);
             } else {
               throw new TypeError(
-                "Error: append function field parameter only accepts string or object as an argument"
+                "append function field parameter only accepts string or object as an argument"
               );
             }
           }
         } else {
           throw new TypeError(
-            "Error: append function field parameter only accepts string or object as an argument"
+            "append function field parameter only accepts string or object as an argument"
           );
         }
       },
@@ -91,7 +91,7 @@ export default function ({ req, res }, options = {}) {
           )
         ) {
           throw TypeError(
-            "Error: download function filename parameter only accepts string as an argument"
+            "download function filename parameter only accepts string as an argument"
           );
         }
 
@@ -192,7 +192,7 @@ export default function ({ req, res }, options = {}) {
           );
         } else {
           throw new TypeError(
-            "Error: links function only accepts object as an argument"
+            "links function only accepts object as an argument"
           );
         }
         return this;
@@ -235,13 +235,13 @@ export default function ({ req, res }, options = {}) {
               this.removeHeader(key);
             } else {
               throw new TypeError(
-                "Error: remove function field parameter only accepts string or array of string as an argument"
+                "remove function field parameter only accepts string or array of string as an argument"
               );
             }
           });
         } else {
           throw new TypeError(
-            "Error: remove function field parameter only accepts string or array of string as an argument"
+            "remove function field parameter only accepts string or array of string as an argument"
           );
         }
         return this;
@@ -349,7 +349,7 @@ export default function ({ req, res }, options = {}) {
       value: function (field, value = null) {
         if (!field) {
           throw new TypeError(
-            "Error: set header function field parameter only accepts string or object as an argument"
+            "set header function field parameter only accepts string or object as an argument"
           );
         }
 
@@ -361,13 +361,13 @@ export default function ({ req, res }, options = {}) {
               this.setHeader(key, field[key]);
             } else {
               throw new TypeError(
-                "Error: set header function field parameter only accepts string or object as an argument"
+                "set header function field parameter only accepts string or object as an argument"
               );
             }
           }
         } else {
           throw new TypeError(
-            "Error: set header function field parameter only accepts string or object as an argument"
+            "set header function field parameter only accepts string or object as an argument"
           );
         }
         return this;
